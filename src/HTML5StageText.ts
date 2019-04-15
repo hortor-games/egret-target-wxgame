@@ -76,6 +76,12 @@ namespace egret.wxgame {
                 multiple: this.$textfield.multiline,
                 confirmHold: true,
                 confirmType: 'done',
+                success: () => {
+                    wx.onKeyboardConfirm(this.onKeyboardComplete);
+                    wx.onKeyboardComplete(this.onKeyboardComplete);
+                    wx.onKeyboardInput(this.onKeyboardInput);
+                    this.dispatchEvent(new egret.Event("focus"));
+                },
                 fail: function (res) {
                     console.log(res.errMsg)
                 }
@@ -84,11 +90,7 @@ namespace egret.wxgame {
                 info.maxLength = this.$textfield.maxChars;
             }
             wx.showKeyboard(info);
-            wx.onKeyboardConfirm(this.onKeyboardComplete);
-            wx.onKeyboardComplete(this.onKeyboardComplete);
-            wx.onKeyboardInput(this.onKeyboardInput);
 
-            this.dispatchEvent(new egret.Event("focus"));
         }
 
         private onKeyboardInput(data): void {

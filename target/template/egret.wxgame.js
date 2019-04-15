@@ -2283,11 +2283,18 @@ r.prototype = e.prototype, t.prototype = new r();
              *
              */
             HTML5StageText.prototype.$show = function () {
+                var _this = this;
                 var info = {
                     defaultValue: this.$textfield.text,
                     multiple: this.$textfield.multiline,
                     confirmHold: true,
                     confirmType: 'done',
+                    success: function () {
+                        wx.onKeyboardConfirm(_this.onKeyboardComplete);
+                        wx.onKeyboardComplete(_this.onKeyboardComplete);
+                        wx.onKeyboardInput(_this.onKeyboardInput);
+                        _this.dispatchEvent(new egret.Event("focus"));
+                    },
                     fail: function (res) {
                         console.log(res.errMsg);
                     }
@@ -2296,10 +2303,6 @@ r.prototype = e.prototype, t.prototype = new r();
                     info.maxLength = this.$textfield.maxChars;
                 }
                 wx.showKeyboard(info);
-                wx.onKeyboardConfirm(this.onKeyboardComplete);
-                wx.onKeyboardComplete(this.onKeyboardComplete);
-                wx.onKeyboardInput(this.onKeyboardInput);
-                this.dispatchEvent(new egret.Event("focus"));
             };
             HTML5StageText.prototype.onKeyboardInput = function (data) {
                 this.textValue = data.value;
