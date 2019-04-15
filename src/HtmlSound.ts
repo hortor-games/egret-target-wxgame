@@ -157,7 +157,7 @@ namespace egret.wxgame {
             else {
                 //audio.load();
             }
-            audio.autoplay = true;
+            audio.autoplay = false;
 
             let channel = new HtmlSoundChannel(audio);
             channel.$url = this.url;

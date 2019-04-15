@@ -632,7 +632,7 @@ r.prototype = e.prototype, t.prototype = new r();
                 else {
                     //audio.load();
                 }
-                audio.autoplay = true;
+                audio.autoplay = false;
                 var channel = new wxgame.HtmlSoundChannel(audio);
                 channel.$url = this.url;
                 channel.$loops = loops;
