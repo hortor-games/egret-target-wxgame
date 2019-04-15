@@ -868,6 +868,19 @@ namespace egret.wxgame {
                 node.$canvasScaleX = canvasScaleX;
                 node.$canvasScaleY = canvasScaleY;
                 node.dirtyRender = true;
+                node["redrawCounter"] = textRedrawCounter;
+                node["lastUpdateTime"] = Date.now();
+            }
+            else {
+                if ((egret.Capabilities.os == "iOS") && (node["redrawCounter"] > 0)) {
+                    var lastUpdateTime = node["lastUpdateTime"];
+                    var now = Date.now();
+                    if (!node.dirtyRender && (now - lastUpdateTime > 100)) {
+                        node.dirtyRender = true;
+                        node["lastUpdateTime"] = now;
+                        --node["redrawCounter"];
+                    }
+                }
             }
             if (this.isiOS10) {
                 if (!this.canvasRenderer) {

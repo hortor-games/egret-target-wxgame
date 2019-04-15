@@ -3124,6 +3124,10 @@ r.prototype = e.prototype, t.prototype = new r();
          * 解决提交纹理异常临时方案
          */
         wxgame.preUploadTexture = false;
+        /**
+         * 解决 iOS 系统文字渲染为空
+         */
+        wxgame.textRedrawCounter = 0;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 (function (egret) {
@@ -7069,6 +7073,19 @@ window["sharedCanvas"].isCanvas = true;
                     node.$canvasScaleX = canvasScaleX;
                     node.$canvasScaleY = canvasScaleY;
                     node.dirtyRender = true;
+                    node["redrawCounter"] = wxgame.textRedrawCounter;
+                    node["lastUpdateTime"] = Date.now();
+                }
+                else {
+                    if ((egret.Capabilities.os == "iOS") && (node["redrawCounter"] > 0)) {
+                        var lastUpdateTime = node["lastUpdateTime"];
+                        var now = Date.now();
+                        if (!node.dirtyRender && (now - lastUpdateTime > 100)) {
+                            node.dirtyRender = true;
+                            node["lastUpdateTime"] = now;
+                            --node["redrawCounter"];
+                        }
+                    }
                 }
                 if (this.isiOS10) {
                     if (!this.canvasRenderer) {

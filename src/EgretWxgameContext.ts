@@ -42,6 +42,11 @@ namespace egret.wxgame {
      * 解决提交纹理异常临时方案
      */
     export let preUploadTexture: boolean = false;
+
+    /**
+     * 解决 iOS 系统文字渲染为空
+     */
+    export let textRedrawCounter: number = 0;
 }
 
 namespace egret.wxgame {
