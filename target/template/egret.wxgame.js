@@ -2883,6 +2883,12 @@ r.prototype = e.prototype, t.prototype = new r();
                     if (!isShow) {
                         context.resume();
                         isShow = true;
+                        try {
+                            egret.sys.$TempStage.$screen["webTouchHandler"].touch.useTouchesCount = 0;
+                        }
+                        catch (e) {
+                            console.warn(e);
+                        }
                     }
                 });
             }
