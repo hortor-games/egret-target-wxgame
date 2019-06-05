@@ -5366,6 +5366,7 @@ window["sharedCanvas"].isCanvas = true;
                         }
                     }
                     if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
+                        bitmapData.source.src = '';
                         bitmapData.source = null;
                         bitmapData.clearCompressedTextureData();
                     }
