@@ -43,86 +43,12 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * @private
          */
-        var fpsText = new egret.TextField();
-        /**
-         * @private
-         */
-        var WebFps = (function (_super) {
-            __extends(WebFps, _super);
-            function WebFps(stage, showFPS, showLog, logFilter, styles) {
-                var _this = _super.call(this) || this;
-                _this.arrFps = [];
-                _this.arrCost = [];
-                if (!showFPS && !showLog) {
-                    return _this;
-                }
-                _this.arrFps = [];
-                _this.arrCost = [];
-                fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
-                fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
-                fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
-                var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
-                fpsText.size = fontSize;
-                return _this;
-            }
-            WebFps.prototype.addFps = function () {
-            };
-            WebFps.prototype.addLog = function () {
-            };
-            WebFps.prototype.update = function (datas, showLastData) {
-                if (showLastData === void 0) { showLastData = false; }
-                var numFps;
-                var numCostTicker;
-                var numCostRender;
-                if (!showLastData) {
-                    numFps = datas.fps;
-                    numCostTicker = datas.costTicker;
-                    numCostRender = datas.costRender;
-                    this.lastNumDraw = datas.draw;
-                    this.arrFps.push(numFps);
-                    this.arrCost.push([numCostTicker, numCostRender]);
-                }
-                else {
-                    numFps = this.arrFps[this.arrFps.length - 1];
-                    numCostTicker = this.arrCost[this.arrCost.length - 1][0];
-                    numCostRender = this.arrCost[this.arrCost.length - 1][1];
-                }
-                var fpsTotal = 0;
-                var lenFps = this.arrFps.length;
-                if (lenFps > 101) {
-                    lenFps = 101;
-                    this.arrFps.shift();
-                    this.arrCost.shift();
-                }
-                var fpsMin = this.arrFps[0];
-                var fpsMax = this.arrFps[0];
-                for (var i = 0; i < lenFps; i++) {
-                    var num = this.arrFps[i];
-                    fpsTotal += num;
-                    if (num < fpsMin)
-                        fpsMin = num;
-                    else if (num > fpsMax)
-                        fpsMax = num;
-                }
-                var fpsAvg = Math.floor(fpsTotal / lenFps);
-                fpsText.text = numFps + " FPS \n"
-                    + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
-                    + ("Draw " + this.lastNumDraw + "\n")
-                    + ("Cost " + numCostTicker + " " + numCostRender);
-                egret.sys.$TempStage.addChild(fpsText);
-            };
-            ;
-            WebFps.prototype.updateInfo = function (info) {
-            };
-            WebFps.prototype.updateWarn = function (info) {
-            };
-            WebFps.prototype.updateError = function (info) {
-            };
-            return WebFps;
-        }(egret.DisplayObject));
-        wxgame.WebFps = WebFps;
-        __reflect(WebFps.prototype, "egret.wxgame.WebFps", ["egret.FPSDisplay"]);
-        egret.FPSDisplay = WebFps;
+        function getOption(key) {
+            var launchOptions = wx.getLaunchOptionsSync();
+            return launchOptions.query[key] || launchOptions[key];
+        }
+        wxgame.getOption = getOption;
+        egret.getOption = getOption;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
@@ -153,293 +79,34 @@ r.prototype = e.prototype, t.prototype = new r();
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
+if (window['HTMLDivElement'] == undefined) {
+    window['HTMLDivElement'] = HTMLElement;
+}
+// There is no HTMLDivElement in webkit for air
+if (window['HTMLVideoElement'] == undefined) {
+    window['HTMLVideoElement'] = HTMLDivElement;
+}
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        /**
-         * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
-         * transparent bitmap that contains alpha channel data. Either type of BitmapData object is stored as a buffer of 32-bit
-         * integers. Each 32-bit integer determines the properties of a single pixel in the bitmap.<br/>
-         * Each 32-bit integer is a combination of four 8-bit channel values (from 0 to 255) that describe the alpha transparency
-         * and the red, green, and blue (ARGB) values of the pixel. (For ARGB values, the most significant byte represents the
-         * alpha channel value, followed by red, green, and blue.)
-         * @see egret.Bitmap
-         * @version Egret 2.4
-         * @platform Web,Native
-         * @language en_US
-         */
-        /**
-         * BitmapData 对象是一个包含像素数据的数组。此数据可以表示完全不透明的位图，或表示包含 Alpha 通道数据的透明位图。
-         * 以上任一类型的 BitmapData 对象都作为 32 位整数的缓冲区进行存储。每个 32 位整数确定位图中单个像素的属性。<br/>
-         * 每个 32 位整数都是四个 8 位通道值（从 0 到 255）的组合，这些值描述像素的 Alpha 透明度以及红色、绿色、蓝色 (ARGB) 值。
-         * （对于 ARGB 值，最高有效字节代表 Alpha 通道值，其后的有效字节分别代表红色、绿色和蓝色通道值。）
-         * @see egret.Bitmap
-         * @version Egret 2.4
-         * @platform Web,Native
-         * @language zh_CN
-         */
-        var BitmapData = (function (_super) {
-            __extends(BitmapData, _super);
-            /**
-             * Initializes a BitmapData object to refer to the specified source object.
-             * @param source The source object being referenced.
-             * @version Egret 2.4
-             * @platform Web,Native
-             * @language en_US
-             */
-            /**
-             * 创建一个引用指定 source 实例的 BitmapData 对象
-             * @param source 被引用的 source 实例
-             * @version Egret 2.4
-             * @platform Web,Native
-             * @language zh_CN
-             */
-            function BitmapData(source) {
-                var _this = _super.call(this) || this;
-                /**
-                 * Texture format.
-                 * @version Egret 2.4
-                 * @platform Web,Native
-                 * @language en_US
-                 */
-                /**
-                 * 纹理格式。
-                 * @version Egret 2.4
-                 * @platform Web,Native
-                 * @language zh_CN
-                 */
-                _this.format = "image";
-                /**
-                 * @private
-                 * webgl纹理生成后，是否删掉原始图像数据
-                 */
-                _this.$deleteSource = true;
-                _this.source = source;
-                _this.width = source.width;
-                _this.height = source.height;
-                return _this;
-            }
-            Object.defineProperty(BitmapData.prototype, "source", {
-                get: function () {
-                    return this.$source;
-                },
-                set: function (value) {
-                    this.$source = value;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            BitmapData.create = function (type, data, callback) {
-                var base64 = "";
-                if (type === "arraybuffer") {
-                    base64 = egret.Base64Util.encode(data);
-                }
-                else {
-                    base64 = data;
-                }
-                var imageType = "image/png"; //default value
-                if (base64.charAt(0) === '/') {
-                    imageType = "image/jpeg";
-                }
-                else if (base64.charAt(0) === 'R') {
-                    imageType = "image/gif";
-                }
-                else if (base64.charAt(0) === 'i') {
-                    imageType = "image/png";
-                }
-                var img = new Image();
-                img.src = "data:" + imageType + ";base64," + base64;
-                img.crossOrigin = '*';
-                var bitmapData = new BitmapData(img);
-                img.onload = function () {
-                    img.onload = undefined;
-                    bitmapData.source = img;
-                    bitmapData.height = img.height;
-                    bitmapData.width = img.width;
-                    if (callback) {
-                        callback(bitmapData);
-                    }
-                };
-                return bitmapData;
-            };
-            BitmapData.prototype.$dispose = function () {
-                if (egret.Capabilities.renderMode == "webgl" && this.webGLTexture) {
-                    egret.WebGLUtils.deleteWebGLTexture(this.webGLTexture);
-                    this.webGLTexture = null;
-                }
-                //native or WebGLRenderTarget
-                if (this.source && this.source.dispose) {
-                    this.source.dispose();
-                }
-                // clean buffer for wechat
-                if (this.source && this.source.src) {
-                    this.source.src = "";
-                }
-                this.source = null;
-                BitmapData.$dispose(this);
-            };
-            BitmapData.$addDisplayObject = function (displayObject, bitmapData) {
-                if (!bitmapData) {
-                    return;
-                }
-                var hashCode = bitmapData.hashCode;
-                if (!hashCode) {
-                    return;
-                }
-                if (!BitmapData._displayList[hashCode]) {
-                    BitmapData._displayList[hashCode] = [displayObject];
-                    return;
-                }
-                var tempList = BitmapData._displayList[hashCode];
-                if (tempList.indexOf(displayObject) < 0) {
-                    tempList.push(displayObject);
-                }
-            };
-            BitmapData.$removeDisplayObject = function (displayObject, bitmapData) {
-                if (!bitmapData) {
-                    return;
-                }
-                var hashCode = bitmapData.hashCode;
-                if (!hashCode) {
-                    return;
-                }
-                if (!BitmapData._displayList[hashCode]) {
-                    return;
-                }
-                var tempList = BitmapData._displayList[hashCode];
-                var index = tempList.indexOf(displayObject);
-                if (index >= 0) {
-                    tempList.splice(index, 1);
-                }
-            };
-            BitmapData.$invalidate = function (bitmapData) {
-                if (!bitmapData) {
-                    return;
-                }
-                var hashCode = bitmapData.hashCode;
-                if (!hashCode) {
-                    return;
-                }
-                if (!BitmapData._displayList[hashCode]) {
-                    return;
-                }
-                var tempList = BitmapData._displayList[hashCode];
-                for (var i = 0; i < tempList.length; i++) {
-                    if (tempList[i] instanceof egret.Bitmap) {
-                        tempList[i].$refreshImageData();
-                    }
-                    var bitmap = tempList[i];
-                    bitmap.$renderDirty = true;
-                    var p = bitmap.$parent;
-                    if (p && !p.$cacheDirty) {
-                        p.$cacheDirty = true;
-                        p.$cacheDirtyUp();
-                    }
-                    var maskedObject = bitmap.$maskedObject;
-                    if (maskedObject && !maskedObject.$cacheDirty) {
-                        maskedObject.$cacheDirty = true;
-                        maskedObject.$cacheDirtyUp();
-                    }
-                }
-            };
-            BitmapData.$dispose = function (bitmapData) {
-                if (!bitmapData) {
-                    return;
-                }
-                var hashCode = bitmapData.hashCode;
-                if (!hashCode) {
-                    return;
-                }
-                if (!BitmapData._displayList[hashCode]) {
-                    return;
-                }
-                var tempList = BitmapData._displayList[hashCode];
-                for (var _i = 0, tempList_1 = tempList; _i < tempList_1.length; _i++) {
-                    var node = tempList_1[_i];
-                    if (node instanceof egret.Bitmap) {
-                        node.$bitmapData = null;
-                    }
-                    node.$renderDirty = true;
-                    var p = node.$parent;
-                    if (p && !p.$cacheDirty) {
-                        p.$cacheDirty = true;
-                        p.$cacheDirtyUp();
-                    }
-                    var maskedObject = node.$maskedObject;
-                    if (maskedObject && !maskedObject.$cacheDirty) {
-                        maskedObject.$cacheDirty = true;
-                        maskedObject.$cacheDirtyUp();
-                    }
-                }
-                delete BitmapData._displayList[hashCode];
-            };
-            BitmapData._displayList = egret.createMap();
-            return BitmapData;
-        }(egret.HashObject));
-        wxgame.BitmapData = BitmapData;
-        __reflect(BitmapData.prototype, "egret.wxgame.BitmapData");
-        egret.BitmapData = BitmapData;
+        var className = "egret.BitmapData";
+        egret.registerClass(HTMLImageElement, className);
+        egret.registerClass(HTMLCanvasElement, className);
+        egret.registerClass(HTMLVideoElement, className);
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-//////////////////////////////////////////////////////////////////////////////////////
-//
-//  Copyright (c) 2014-present, Egret Technology.
-//  All rights reserved.
-//  Redistribution and use in source and binary forms, with or without
-//  modification, are permitted provided that the following conditions are met:
-//
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the Egret nor the
-//       names of its contributors may be used to endorse or promote products
-//       derived from this software without specific prior written permission.
-//
-//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
-//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
-//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-//////////////////////////////////////////////////////////////////////////////////////
-
 (function (egret) {
-    var wxgame;
-    (function (wxgame) {
-        /**
-         * @private
-         */
-        var WebExternalInterface = (function () {
-            function WebExternalInterface() {
-            }
-            /**
-             * @private
-             * @param functionName
-             * @param value
-             */
-            WebExternalInterface.call = function (functionName, value) {
-            };
-            /**
-             * @private
-             * @param functionName
-             * @param listener
-             */
-            WebExternalInterface.addCallback = function (functionName, listener) {
-            };
-            return WebExternalInterface;
-        }());
-        wxgame.WebExternalInterface = WebExternalInterface;
-        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
-        egret.ExternalInterface = WebExternalInterface;
-    })(wxgame = egret.wxgame || (egret.wxgame = {}));
+    /**
+     * 转换 Image，Canvas，Video 为 Egret 框架内使用的 BitmapData 对象。
+     * @param data 需要转换的对象，包括HTMLImageElement|HTMLCanvasElement|HTMLVideoElement
+     * @deprecated
+     */
+    function $toBitmapData(data) {
+        data["hashCode"] = data["$hashCode"] = egret.$hashCount++;
+        return data;
+    }
+    egret.$toBitmapData = $toBitmapData;
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1650,7 +1317,7 @@ r.prototype = e.prototype, t.prototype = new r();
                     if (!this._bitmapData) {
                         this.video.width = this.video.videoWidth;
                         this.video.height = this.video.videoHeight;
-                        this._bitmapData = new wxgame.BitmapData(this.video);
+                        this._bitmapData = new egret.BitmapData(this.video);
                         this._bitmapData.$deleteSource = false;
                     }
                     return this._bitmapData;
@@ -1828,6 +1495,7 @@ r.prototype = e.prototype, t.prototype = new r();
              */
             function WebHttpRequest() {
                 var _this = _super.call(this) || this;
+                _this.timeout = 0;
                 /**
                  * @private
                  */
@@ -3124,7 +2792,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.12";
+        wxgame.version = "1.1.13";
         /**
          * 运行环境是否为子域
          */
@@ -3389,34 +3057,94 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-if (window['HTMLDivElement'] == undefined) {
-    window['HTMLDivElement'] = HTMLElement;
-}
-// There is no HTMLDivElement in webkit for air
-if (window['HTMLVideoElement'] == undefined) {
-    window['HTMLVideoElement'] = HTMLDivElement;
-}
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        var className = "egret.BitmapData";
-        egret.registerClass(HTMLImageElement, className);
-        egret.registerClass(HTMLCanvasElement, className);
-        egret.registerClass(HTMLVideoElement, className);
+        /**
+         * @private
+         */
+        var fpsText = new egret.TextField();
+        /**
+         * @private
+         */
+        var WebFps = (function (_super) {
+            __extends(WebFps, _super);
+            function WebFps(stage, showFPS, showLog, logFilter, styles) {
+                var _this = _super.call(this) || this;
+                _this.arrFps = [];
+                _this.arrCost = [];
+                if (!showFPS && !showLog) {
+                    return _this;
+                }
+                _this.arrFps = [];
+                _this.arrCost = [];
+                fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
+                fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
+                fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
+                var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
+                fpsText.size = fontSize;
+                return _this;
+            }
+            WebFps.prototype.addFps = function () {
+            };
+            WebFps.prototype.addLog = function () {
+            };
+            WebFps.prototype.update = function (datas, showLastData) {
+                if (showLastData === void 0) { showLastData = false; }
+                var numFps;
+                var numCostTicker;
+                var numCostRender;
+                if (!showLastData) {
+                    numFps = datas.fps;
+                    numCostTicker = datas.costTicker;
+                    numCostRender = datas.costRender;
+                    this.lastNumDraw = datas.draw;
+                    this.arrFps.push(numFps);
+                    this.arrCost.push([numCostTicker, numCostRender]);
+                }
+                else {
+                    numFps = this.arrFps[this.arrFps.length - 1];
+                    numCostTicker = this.arrCost[this.arrCost.length - 1][0];
+                    numCostRender = this.arrCost[this.arrCost.length - 1][1];
+                }
+                var fpsTotal = 0;
+                var lenFps = this.arrFps.length;
+                if (lenFps > 101) {
+                    lenFps = 101;
+                    this.arrFps.shift();
+                    this.arrCost.shift();
+                }
+                var fpsMin = this.arrFps[0];
+                var fpsMax = this.arrFps[0];
+                for (var i = 0; i < lenFps; i++) {
+                    var num = this.arrFps[i];
+                    fpsTotal += num;
+                    if (num < fpsMin)
+                        fpsMin = num;
+                    else if (num > fpsMax)
+                        fpsMax = num;
+                }
+                var fpsAvg = Math.floor(fpsTotal / lenFps);
+                fpsText.text = numFps + " FPS \n"
+                    + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
+                    + ("Draw " + this.lastNumDraw + "\n")
+                    + ("Cost " + numCostTicker + " " + numCostRender);
+                egret.sys.$TempStage.addChild(fpsText);
+            };
+            ;
+            WebFps.prototype.updateInfo = function (info) {
+            };
+            WebFps.prototype.updateWarn = function (info) {
+            };
+            WebFps.prototype.updateError = function (info) {
+            };
+            return WebFps;
+        }(egret.DisplayObject));
+        wxgame.WebFps = WebFps;
+        __reflect(WebFps.prototype, "egret.wxgame.WebFps", ["egret.FPSDisplay"]);
+        egret.FPSDisplay = WebFps;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
-})(egret || (egret = {}));
-(function (egret) {
-    /**
-     * 转换 Image，Canvas，Video 为 Egret 框架内使用的 BitmapData 对象。
-     * @param data 需要转换的对象，包括HTMLImageElement|HTMLCanvasElement|HTMLVideoElement
-     * @deprecated
-     */
-    function $toBitmapData(data) {
-        data["hashCode"] = data["$hashCode"] = egret.$hashCount++;
-        return data;
-    }
-    egret.$toBitmapData = $toBitmapData;
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3453,12 +3181,28 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * @private
          */
-        function getOption(key) {
-            var launchOptions = wx.getLaunchOptionsSync();
-            return launchOptions.query[key] || launchOptions[key];
-        }
-        wxgame.getOption = getOption;
-        egret.getOption = getOption;
+        var WebExternalInterface = (function () {
+            function WebExternalInterface() {
+            }
+            /**
+             * @private
+             * @param functionName
+             * @param value
+             */
+            WebExternalInterface.call = function (functionName, value) {
+            };
+            /**
+             * @private
+             * @param functionName
+             * @param listener
+             */
+            WebExternalInterface.addCallback = function (functionName, listener) {
+            };
+            return WebExternalInterface;
+        }());
+        wxgame.WebExternalInterface = WebExternalInterface;
+        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
+        egret.ExternalInterface = WebExternalInterface;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
@@ -5034,6 +4778,162 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
+        /*
+        * 覆盖掉系统的 createCanvas
+        */
+        function mainCanvas(width, height) {
+            return window['canvas'];
+        }
+        egret.sys.mainCanvas = mainCanvas;
+        function createCanvas(width, height) {
+            var canvas = document.createElement("canvas");
+            if (!isNaN(width) && !isNaN(height)) {
+                canvas.width = width;
+                canvas.height = height;
+            }
+            return canvas;
+        }
+        egret.sys.createCanvas = createCanvas;
+        /*
+        * 覆盖掉系统的 resizeContext
+        */
+        function resizeContext(renderContext, width, height, useMaxSize) {
+            if (!renderContext) {
+                return;
+            }
+            var webglrendercontext = renderContext;
+            var surface = webglrendercontext.surface;
+            if (useMaxSize) {
+                if (surface.width < width) {
+                    surface.width = width;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].width = width;
+                    }
+                }
+                if (surface.height < height) {
+                    surface.height = height;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].height = height;
+                    }
+                }
+            }
+            else {
+                if (surface.width !== width) {
+                    surface.width = width;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].width = width;
+                    }
+                }
+                if (surface.height !== height) {
+                    surface.height = height;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].height = height;
+                    }
+                }
+            }
+            webglrendercontext.onResize();
+        }
+        wxgame.resizeContext = resizeContext;
+        egret.sys.resizeContext = resizeContext;
+        /**
+         * sys.getContextWebGL
+         */
+        function getContextWebGL(surface) {
+            return surface ? surface.getContext('webgl') : null;
+        }
+        egret.sys.getContextWebGL = getContextWebGL;
+        /**
+         * sys.getContext2d
+         */
+        function getContext2d(surface) {
+            return surface ? surface.getContext('2d') : null;
+        }
+        wxgame.getContext2d = getContext2d;
+        egret.sys.getContext2d = getContext2d;
+        /**
+         * 覆盖掉系统的createTexture
+         */
+        function createTexture(renderContext, bitmapData) {
+            var webglrendercontext = renderContext;
+            var gl = webglrendercontext.context;
+            if (bitmapData.isCanvas && gl.wxBindCanvasTexture) {
+                return bitmapData;
+            }
+            var texture = gl.createTexture();
+            if (!texture) {
+                //先创建texture失败,然后lost事件才发出来..
+                webglrendercontext.contextLost = true;
+                return null;
+            }
+            texture.glContext = gl;
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            if (bitmapData.source) {
+                bitmapData.source.src = "";
+            }
+            return texture;
+        }
+        egret.sys.createTexture = createTexture;
+        /**
+        * 覆盖掉系统的drawTextureElements
+        **/
+        function drawTextureElements(renderContext, data, offset) {
+            var webglrendercontext = renderContext;
+            var gl = webglrendercontext.context;
+            gl.activeTexture(gl.TEXTURE0);
+            if (data.texture.isCanvas) {
+                gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
+            }
+            else {
+                gl.bindTexture(gl.TEXTURE_2D, data.texture);
+            }
+            var size = data.count * 3;
+            gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
+            return size;
+        }
+        egret.sys.drawTextureElements = drawTextureElements;
+    })(wxgame = egret.wxgame || (egret.wxgame = {}));
+})(egret || (egret = {}));
+window["sharedCanvas"].isCanvas = true;
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
+(function (egret) {
+    var wxgame;
+    (function (wxgame) {
+        //TO DO
+        var debugLogCompressedTextureNotSupported = {};
         /**
          * @private
          * WebGL上下文对象，提供简单的绘图接口
@@ -5041,13 +4941,20 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
          */
         var WebGLRenderContext = (function () {
             function WebGLRenderContext(width, height) {
+                //
+                this._defaultEmptyTexture = null;
                 this.glID = null;
                 this.projectionX = NaN;
                 this.projectionY = NaN;
                 this.contextLost = false;
+                //refactor
+                this._supportedCompressedTextureInfo = [];
                 this.$scissorState = false;
                 this.vertSize = 5;
-                this.surface = window['canvas'];
+                this.surface = egret.sys.mainCanvas(width, height);
+                if (egret.nativeRender) {
+                    return;
+                }
                 this.initWebGL();
                 this.$bufferStack = [];
                 var gl = this.context;
@@ -5147,36 +5054,64 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
              */
             WebGLRenderContext.prototype.resize = function (width, height, useMaxSize) {
-                var surface = this.surface;
+                egret.sys.resizeContext(this, width, height, useMaxSize);
+                /*
+                let surface = this.surface;
                 if (useMaxSize) {
                     if (surface.width < width) {
                         surface.width = width;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].width = width;
-                        }
                     }
                     if (surface.height < height) {
                         surface.height = height;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].height = height;
-                        }
                     }
                 }
                 else {
                     if (surface.width != width) {
                         surface.width = width;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].width = width;
-                        }
                     }
                     if (surface.height != height) {
                         surface.height = height;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].height = height;
-                        }
                     }
                 }
+    
                 this.onResize();
+                */
+            };
+            WebGLRenderContext.prototype._buildSupportedCompressedTextureInfo = function (/*gl: WebGLRenderingContext, compressedTextureExNames: string[],*/ extensions) {
+                // if (compressedTextureExNames.length === 0) {
+                //     return [];
+                // }
+                var returnValue = [];
+                // for (const exName of compressedTextureExNames) {
+                //     const extension = gl.getExtension(exName);
+                for (var _i = 0, extensions_1 = extensions; _i < extensions_1.length; _i++) {
+                    var extension = extensions_1[_i];
+                    if (!extension) {
+                        continue;
+                    }
+                    var info = {
+                        extensionName: extension.name,
+                        supportedFormats: []
+                    };
+                    //
+                    for (var key in extension) {
+                        info.supportedFormats.push([key, extension[key]]);
+                    }
+                    //
+                    if (true) {
+                        if (info.supportedFormats.length === 0) {
+                            console.error('buildSupportedCompressedTextureInfo failed = ' + extension.name);
+                        }
+                        else {
+                            egret.log('support: ' + extension.name);
+                            for (var key in extension) {
+                                egret.log(key, extension[key], '0x' + extension[key].toString(16));
+                            }
+                        }
+                    }
+                    returnValue.push(info);
+                }
+                return returnValue;
             };
             WebGLRenderContext.prototype.initWebGL = function () {
                 this.onResize();
@@ -5185,6 +5120,36 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.getWebGLContext();
                 var gl = this.context;
                 this.$maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+                //refactor
+                // this._caps.astc = this._gl.getExtension('WEBGL_compressed_texture_astc') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_astc');
+                // this._caps.s3tc = this._gl.getExtension('WEBGL_compressed_texture_s3tc') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_s3tc');
+                // this._caps.pvrtc = this._gl.getExtension('WEBGL_compressed_texture_pvrtc') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');
+                // this._caps.etc1 = this._gl.getExtension('WEBGL_compressed_texture_etc1') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc1');
+                // this._caps.etc2 = this._gl.getExtension('WEBGL_compressed_texture_etc') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc') ||
+                //     this._gl.getExtension('WEBGL_compressed_texture_es3_0'); // also a requirement of OpenGL ES 3
+                // const compressedTextureExNames = [
+                //     'WEBGL_compressed_texture_pvrtc', 'WEBKIT_WEBGL_compressed_texture_pvrtc',
+                //     'WEBGL_compressed_texture_etc1', 'WEBKIT_WEBGL_compressed_texture_etc1',
+                //     'WEBGL_compressed_texture_etc', 'WEBKIT_WEBGL_compressed_texture_etc',
+                //     'WEBGL_compressed_texture_astc', 'WEBKIT_WEBGL_compressed_texture_astc',
+                //     'WEBGL_compressed_texture_s3tc', 'WEBKIT_WEBGL_compressed_texture_s3tc',
+                //     'WEBGL_compressed_texture_es3_0'];
+                //
+                this.pvrtc = gl.getExtension('WEBGL_compressed_texture_pvrtc') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');
+                if (this.pvrtc) {
+                    this.pvrtc.name = 'WEBGL_compressed_texture_pvrtc';
+                }
+                //
+                this.etc1 = gl.getExtension('WEBGL_compressed_texture_etc1') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc1');
+                if (this.etc1) {
+                    this.etc1.name = 'WEBGL_compressed_texture_etc1';
+                }
+                //
+                egret.Capabilities.supportedCompressedTexture = egret.Capabilities.supportedCompressedTexture || {};
+                egret.Capabilities.supportedCompressedTexture.pvrtc = !!this.pvrtc;
+                egret.Capabilities.supportedCompressedTexture.etc1 = !!this.etc1;
+                //
+                this._supportedCompressedTextureInfo = this._buildSupportedCompressedTextureInfo(/*this.context, compressedTextureExNames,*/ [this.etc1, this.pvrtc]);
             };
             WebGLRenderContext.prototype.handleContextLost = function () {
                 this.contextLost = true;
@@ -5194,28 +5159,30 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.contextLost = false;
             };
             WebGLRenderContext.prototype.getWebGLContext = function () {
-                // let options = {
-                //     antialias: WebGLRenderContext.antialias,
-                //     stencil: true//设置可以使用模板（用于不规则遮罩）
-                // };
-                // let gl: any;
-                // //todo 是否使用chrome源码names
-                // //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
-                // let names = ["webgl", "experimental-webgl"];
-                // for (let i = 0; i < names.length; i++) {
-                //     try {
-                //         gl = this.surface.getContext(names[i], options);
-                //     } catch (e) {
-                //     }
-                //     if (gl) {
-                //         break;
-                //     }
-                // }
-                // if (!gl) {
-                //     $error(1021);
-                // }
-                // this.setContext(gl);
-                this.setContext(window['canvas'].getContext('webgl'));
+                /*
+                let options = {
+                    antialias: WebGLRenderContext.antialias,
+                    stencil: true//设置可以使用模板（用于不规则遮罩）
+                };
+                let gl: any;
+                //todo 是否使用chrome源码names
+                //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+                let names = ["webgl", "experimental-webgl"];
+                for (let i = 0; i < names.length; i++) {
+                    try {
+                        gl = this.surface.getContext(names[i], options);
+                    } catch (e) {
+                    }
+                    if (gl) {
+                        break;
+                    }
+                }
+                if (!gl) {
+                    $error(1021);
+                }
+                */
+                var gl = egret.sys.getContextWebGL(this.surface);
+                this.setContext(gl);
             };
             WebGLRenderContext.prototype.setContext = function (gl) {
                 this.context = gl;
@@ -5268,31 +5235,94 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * 创建一个WebGLTexture
              */
             WebGLRenderContext.prototype.createTexture = function (bitmapData) {
-                var gl = this.context;
-                if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
-                    return bitmapData;
-                }
-                var texture = gl.createTexture();
+                return egret.sys.createTexture(this, bitmapData);
+                /*
+                let gl: any = this.context;
+    
+                let texture = gl.createTexture();
+    
                 if (!texture) {
                     //先创建texture失败,然后lost事件才发出来..
                     this.contextLost = true;
                     return;
                 }
-                texture.glContext = gl;
+                texture[glContext] = gl;
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData as any);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-                if (bitmapData.source) {
-                    bitmapData.source.src = "";
-                }
                 return texture;
+                */
             };
-            WebGLRenderContext.prototype.createTextureFromCompressedData = function (data, width, height, levels, internalFormat) {
-                return null;
+            /*
+            * TO DO
+            */
+            WebGLRenderContext.prototype.checkCompressedTextureInternalFormat = function (supportedCompressedTextureInfo, internalFormat) {
+                //width: number, height: number max ?
+                for (var i = 0, length_1 = supportedCompressedTextureInfo.length; i < length_1; ++i) {
+                    var ss = supportedCompressedTextureInfo[i];
+                    // const formats = ss._COMPRESSED_TEXTURE_FORMATS_;
+                    // for (let j = 0, length = formats.length; j < length; ++j) {
+                    //     if (formats[j] === internalFormat) {
+                    //         return true;
+                    //     }
+                    // }
+                    var supportedFormats = ss.supportedFormats;
+                    for (var j = 0, length_2 = supportedFormats.length; j < length_2; ++j) {
+                        if (supportedFormats[j][1] === internalFormat) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+            /*
+            * TO DO
+            */
+            WebGLRenderContext.prototype.$debugLogCompressedTextureNotSupported = function (supportedCompressedTextureInfo, internalFormat) {
+                if (!debugLogCompressedTextureNotSupported[internalFormat]) {
+                    debugLogCompressedTextureNotSupported[internalFormat] = true;
+                    egret.log('internalFormat = ' + internalFormat + ':' + ('0x' + internalFormat.toString(16)) + ', the current hardware does not support the corresponding compression format.');
+                    for (var i = 0, length_3 = supportedCompressedTextureInfo.length; i < length_3; ++i) {
+                        var ss = supportedCompressedTextureInfo[i];
+                        if (ss.supportedFormats.length > 0) {
+                            egret.log('support = ' + ss.extensionName);
+                            for (var j = 0, length_4 = ss.supportedFormats.length; j < length_4; ++j) {
+                                var tp = ss.supportedFormats[j];
+                                egret.log(tp[0] + ' : ' + tp[1] + ' : ' + ('0x' + tp[1].toString(16)));
+                            }
+                        }
+                    }
+                }
+            };
+            //
+            WebGLRenderContext.prototype.createCompressedTexture = function (data, width, height, levels, internalFormat) {
+                var checkSupported = this.checkCompressedTextureInternalFormat(this._supportedCompressedTextureInfo, internalFormat);
+                if (!checkSupported) {
+                    this.$debugLogCompressedTextureNotSupported(this._supportedCompressedTextureInfo, internalFormat);
+                    return this.defaultEmptyTexture;
+                }
+                ///
+                var gl = this.context;
+                var texture = gl.createTexture();
+                if (!texture) {
+                    this.contextLost = true;
+                    return;
+                }
+                texture[egret.glContext] = gl;
+                texture[egret.is_compressed_texture] = true;
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+                gl.compressedTexImage2D(gl.TEXTURE_2D, levels, internalFormat, width, height, 0, data);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                return texture;
             };
             /**
              * 更新材质的bitmapData
@@ -5302,24 +5332,47 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
             };
-            /**
-             * 获取一个WebGLTexture
-             * 如果有缓存的texture返回缓存的texture，如果没有则创建并缓存texture
-             */
+            Object.defineProperty(WebGLRenderContext.prototype, "defaultEmptyTexture", {
+                get: function () {
+                    if (!this._defaultEmptyTexture) {
+                        var size = 16;
+                        var canvas = egret.sys.createCanvas(size, size);
+                        var context = egret.sys.getContext2d(canvas); //canvas.getContext('2d');
+                        context.fillStyle = 'white';
+                        context.fillRect(0, 0, size, size);
+                        this._defaultEmptyTexture = this.createTexture(canvas);
+                        this._defaultEmptyTexture[egret.engine_default_empty_texture] = true;
+                    }
+                    return this._defaultEmptyTexture;
+                },
+                enumerable: true,
+                configurable: true
+            });
             WebGLRenderContext.prototype.getWebGLTexture = function (bitmapData) {
                 if (!bitmapData.webGLTexture) {
-                    if (bitmapData.format == "image") {
+                    if (bitmapData.format == "image" && !bitmapData.hasCompressed2d()) {
                         bitmapData.webGLTexture = this.createTexture(bitmapData.source);
                     }
-                    else if (bitmapData.format == "pvr") {
-                        bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
+                    else if (bitmapData.hasCompressed2d()) {
+                        var compressedData = bitmapData.getCompressed2dTextureData();
+                        bitmapData.webGLTexture = this.createCompressedTexture(compressedData.byteArray, compressedData.width, compressedData.height, compressedData.level, compressedData.glInternalFormat);
+                        ///
+                        var etcAlphaMask = bitmapData.etcAlphaMask;
+                        if (etcAlphaMask) {
+                            var maskTexture = this.getWebGLTexture(etcAlphaMask);
+                            if (maskTexture) {
+                                bitmapData.webGLTexture[egret.etc_alpha_mask] = maskTexture;
+                            }
+                        }
                     }
                     if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
-                        bitmapData.source.src = "";
                         bitmapData.source = null;
+                        bitmapData.clearCompressedTextureData();
                     }
-                    //todo 默认值
-                    bitmapData.webGLTexture["smoothing"] = true;
+                    if (bitmapData.webGLTexture) {
+                        //todo 默认值
+                        bitmapData.webGLTexture["smoothing"] = true;
+                    }
                 }
                 return bitmapData.webGLTexture;
             };
@@ -5460,7 +5513,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
                 var count = meshIndices ? meshIndices.length / 3 : 2;
                 // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
-                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter);
+                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
                 this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, textureWidth, textureHeight, meshUVs, meshVertices, meshIndices, rotated);
             };
             /**
@@ -5573,6 +5626,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 var filter = data.filter;
                 switch (data.type) {
                     case 0 /* TEXTURE */:
+                        //这段的切换可以优化
                         if (filter) {
                             if (filter.type === "custom") {
                                 program = wxgame.EgretWebGLProgram.getProgram(gl, filter.$vertexSrc, filter.$fragmentSrc, filter.$shaderKey);
@@ -5591,7 +5645,15 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             }
                         }
                         else {
-                            program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.texture_frag, "texture");
+                            if (data.texture[egret.etc_alpha_mask]) {
+                                program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.texture_etc_alphamask_frag, egret.etc_alpha_mask);
+                                ///need refactor
+                                gl.activeTexture(gl.TEXTURE1);
+                                gl.bindTexture(gl.TEXTURE_2D, data.texture[egret.etc_alpha_mask]);
+                            }
+                            else {
+                                program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.texture_frag, "texture");
+                            }
                         }
                         this.activeProgram(gl, program);
                         this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
@@ -5697,6 +5759,10 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         uniforms[key].setValue({ x: textureWidth, y: textureHeight });
                     }
                     else if (key === "uSampler") {
+                        uniforms[key].setValue(0);
+                    }
+                    else if (key === "uSamplerAlphaMask") {
+                        uniforms[key].setValue(1);
                     }
                     else {
                         var value = filter.$uniforms[key];
@@ -5713,16 +5779,15 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * 画texture
              **/
             WebGLRenderContext.prototype.drawTextureElements = function (data, offset) {
-                var gl = this.context;
-                if (data.texture.isCanvas) {
-                    gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
-                }
-                else {
-                    gl.bindTexture(gl.TEXTURE_2D, data.texture);
-                }
-                var size = data.count * 3;
+                return egret.sys.drawTextureElements(this, data, offset);
+                /*
+                let gl: any = this.context;
+                gl.activeTexture(gl.TEXTURE0); ///refactor
+                gl.bindTexture(gl.TEXTURE_2D, data.texture);
+                let size = data.count * 3;
                 gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
                 return size;
+                */
             };
             /**
              * @private
@@ -5885,11 +5950,10 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             return WebGLRenderContext;
         }());
         wxgame.WebGLRenderContext = WebGLRenderContext;
-        __reflect(WebGLRenderContext.prototype, "egret.wxgame.WebGLRenderContext");
+        __reflect(WebGLRenderContext.prototype, "egret.wxgame.WebGLRenderContext", ["egret.sys.RenderContext"]);
         WebGLRenderContext.initBlendMode();
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-window["sharedCanvas"].isCanvas = true;
 //////////////////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014-present, Egret Technology.
@@ -6343,8 +6407,8 @@ window["sharedCanvas"].isCanvas = true;
                     if (renderBufferPool.length > 6) {
                         renderBufferPool.length = 6;
                     }
-                    var length_1 = renderBufferPool.length;
-                    for (var i = 0; i < length_1; i++) {
+                    var length_5 = renderBufferPool.length;
+                    for (var i = 0; i < length_5; i++) {
                         renderBufferPool[i].resize(0, 0);
                     }
                 }
@@ -6407,8 +6471,8 @@ window["sharedCanvas"].isCanvas = true;
                 }
                 var children = displayObject.$children;
                 if (children) {
-                    var length_2 = children.length;
-                    for (var i = 0; i < length_2; i++) {
+                    var length_6 = children.length;
+                    for (var i = 0; i < length_6; i++) {
                         var child = children[i];
                         var offsetX2 = void 0;
                         var offsetY2 = void 0;
@@ -6852,8 +6916,8 @@ window["sharedCanvas"].isCanvas = true;
                 }
                 var children = displayObject.$children;
                 if (children) {
-                    var length_3 = children.length;
-                    for (var i = 0; i < length_3; i++) {
+                    var length_7 = children.length;
+                    for (var i = 0; i < length_7; i++) {
                         var child = children[i];
                         switch (child.$renderMode) {
                             case 1 /* NONE */:
@@ -7802,22 +7866,48 @@ window["sharedCanvas"].isCanvas = true;
         __reflect(EgretWebGLUniform.prototype, "egret.wxgame.EgretWebGLUniform");
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        /**
-         * @private
-         */
         var EgretShaderLib = (function () {
             function EgretShaderLib() {
             }
-            EgretShaderLib.blur_frag = "precision mediump float;\nuniform vec2 blur;\nuniform sampler2D uSampler;\nvarying vec2 vTextureCoord;\nuniform vec2 uTextureSize;\nvoid main()\n{\n    const int sampleRadius = 5;\n    const int samples = sampleRadius * 2 + 1;\n    vec2 blurUv = blur / uTextureSize;\n    vec4 color = vec4(0, 0, 0, 0);\n    vec2 uv = vec2(0.0, 0.0);\n    blurUv /= float(sampleRadius);\n    for (int i = -sampleRadius; i <= sampleRadius; i++) {\n        uv.x = vTextureCoord.x + float(i) * blurUv.x;\n        uv.y = vTextureCoord.y + float(i) * blurUv.y;\n        color += texture2D(uSampler, uv);\n    }\n    color /= float(samples);\n    gl_FragColor = color;\n}";
-            EgretShaderLib.colorTransform_frag = "precision mediump float;\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\nuniform mat4 matrix;\nuniform vec4 colorAdd;\nuniform sampler2D uSampler;\nvoid main(void) {\n    vec4 texColor = texture2D(uSampler, vTextureCoord);\n    if(texColor.a > 0.) {\n        texColor = vec4(texColor.rgb / texColor.a, texColor.a);\n    }\n    vec4 locColor = clamp(texColor * matrix + colorAdd, 0., 1.);\n    gl_FragColor = vColor * vec4(locColor.rgb * locColor.a, locColor.a);\n}";
-            EgretShaderLib.default_vert = "attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec2 aColor;\nuniform vec2 projectionVector;\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\nconst vec2 center = vec2(-1.0, 1.0);\nvoid main(void) {\n   gl_Position = vec4( (aVertexPosition / projectionVector) + center , 0.0, 1.0);\n   vTextureCoord = aTextureCoord;\n   vColor = vec4(aColor.x, aColor.x, aColor.x, aColor.x);\n}";
-            EgretShaderLib.glow_frag = "precision mediump float;\nvarying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform float dist;\nuniform float angle;\nuniform vec4 color;\nuniform float alpha;\nuniform float blurX;\nuniform float blurY;\nuniform float strength;\nuniform float inner;\nuniform float knockout;\nuniform float hideObject;\nuniform vec2 uTextureSize;\nfloat random(vec3 scale, float seed)\n{\n    return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);\n}\nvoid main(void) {\n    vec2 px = vec2(1.0 / uTextureSize.x, 1.0 / uTextureSize.y);\n    const float linearSamplingTimes = 7.0;\n    const float circleSamplingTimes = 12.0;\n    vec4 ownColor = texture2D(uSampler, vTextureCoord);\n    vec4 curColor;\n    float totalAlpha = 0.0;\n    float maxTotalAlpha = 0.0;\n    float curDistanceX = 0.0;\n    float curDistanceY = 0.0;\n    float offsetX = dist * cos(angle) * px.x;\n    float offsetY = dist * sin(angle) * px.y;\n    const float PI = 3.14159265358979323846264;\n    float cosAngle;\n    float sinAngle;\n    float offset = PI * 2.0 / circleSamplingTimes * random(vec3(12.9898, 78.233, 151.7182), 0.0);\n    float stepX = blurX * px.x / linearSamplingTimes;\n    float stepY = blurY * px.y / linearSamplingTimes;\n    for (float a = 0.0; a <= PI * 2.0; a += PI * 2.0 / circleSamplingTimes) {\n        cosAngle = cos(a + offset);\n        sinAngle = sin(a + offset);\n        for (float i = 1.0; i <= linearSamplingTimes; i++) {\n            curDistanceX = i * stepX * cosAngle;\n            curDistanceY = i * stepY * sinAngle;\n            \n            curColor = texture2D(uSampler, vec2(vTextureCoord.x + curDistanceX - offsetX, vTextureCoord.y + curDistanceY + offsetY));\n            totalAlpha += (linearSamplingTimes - i) * curColor.a;\n            maxTotalAlpha += (linearSamplingTimes - i);\n        }\n    }\n    ownColor.a = max(ownColor.a, 0.0001);\n    ownColor.rgb = ownColor.rgb / ownColor.a;\n    float outerGlowAlpha = (totalAlpha / maxTotalAlpha) * strength * alpha * (1. - inner) * max(min(hideObject, knockout), 1. - ownColor.a);\n    float innerGlowAlpha = ((maxTotalAlpha - totalAlpha) / maxTotalAlpha) * strength * alpha * inner * ownColor.a;\n    ownColor.a = max(ownColor.a * knockout * (1. - hideObject), 0.0001);\n    vec3 mix1 = mix(ownColor.rgb, color.rgb, innerGlowAlpha / (innerGlowAlpha + ownColor.a));\n    vec3 mix2 = mix(mix1, color.rgb, outerGlowAlpha / (innerGlowAlpha + ownColor.a + outerGlowAlpha));\n    float resultAlpha = min(ownColor.a + outerGlowAlpha + innerGlowAlpha, 1.);\n    gl_FragColor = vec4(mix2 * resultAlpha, resultAlpha);\n}";
-            EgretShaderLib.primitive_frag = "precision lowp float;\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\nvoid main(void) {\n    gl_FragColor = vColor;\n}";
-            EgretShaderLib.texture_frag = "precision lowp float;\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\nuniform sampler2D uSampler;\nvoid main(void) {\n    gl_FragColor = texture2D(uSampler, vTextureCoord) * vColor;\n}";
+            EgretShaderLib.blur_frag = "precision mediump float;\r\nuniform vec2 blur;\r\nuniform sampler2D uSampler;\r\nvarying vec2 vTextureCoord;\r\nuniform vec2 uTextureSize;\r\nvoid main()\r\n{\r\n    const int sampleRadius = 5;\r\n    const int samples = sampleRadius * 2 + 1;\r\n    vec2 blurUv = blur / uTextureSize;\r\n    vec4 color = vec4(0, 0, 0, 0);\r\n    vec2 uv = vec2(0.0, 0.0);\r\n    blurUv /= float(sampleRadius);\r\n\r\n    for (int i = -sampleRadius; i <= sampleRadius; i++) {\r\n        uv.x = vTextureCoord.x + float(i) * blurUv.x;\r\n        uv.y = vTextureCoord.y + float(i) * blurUv.y;\r\n        color += texture2D(uSampler, uv);\r\n    }\r\n\r\n    color /= float(samples);\r\n    gl_FragColor = color;\r\n}";
+            EgretShaderLib.colorTransform_frag = "precision mediump float;\r\nvarying vec2 vTextureCoord;\r\nvarying vec4 vColor;\r\nuniform mat4 matrix;\r\nuniform vec4 colorAdd;\r\nuniform sampler2D uSampler;\r\n\r\nvoid main(void) {\r\n    vec4 texColor = texture2D(uSampler, vTextureCoord);\r\n    if(texColor.a > 0.) {\r\n        // 抵消预乘的alpha通道\r\n        texColor = vec4(texColor.rgb / texColor.a, texColor.a);\r\n    }\r\n    vec4 locColor = clamp(texColor * matrix + colorAdd, 0., 1.);\r\n    gl_FragColor = vColor * vec4(locColor.rgb * locColor.a, locColor.a);\r\n}";
+            EgretShaderLib.default_vert = "attribute vec2 aVertexPosition;\r\nattribute vec2 aTextureCoord;\r\nattribute vec2 aColor;\r\n\r\nuniform vec2 projectionVector;\r\n// uniform vec2 offsetVector;\r\n\r\nvarying vec2 vTextureCoord;\r\nvarying vec4 vColor;\r\n\r\nconst vec2 center = vec2(-1.0, 1.0);\r\n\r\nvoid main(void) {\r\n   gl_Position = vec4( (aVertexPosition / projectionVector) + center , 0.0, 1.0);\r\n   vTextureCoord = aTextureCoord;\r\n   vColor = vec4(aColor.x, aColor.x, aColor.x, aColor.x);\r\n}";
+            EgretShaderLib.glow_frag = "precision highp float;\r\nvarying vec2 vTextureCoord;\r\n\r\nuniform sampler2D uSampler;\r\n\r\nuniform float dist;\r\nuniform float angle;\r\nuniform vec4 color;\r\nuniform float alpha;\r\nuniform float blurX;\r\nuniform float blurY;\r\n// uniform vec4 quality;\r\nuniform float strength;\r\nuniform float inner;\r\nuniform float knockout;\r\nuniform float hideObject;\r\n\r\nuniform vec2 uTextureSize;\r\n\r\nfloat random(vec2 scale)\r\n{\r\n    return fract(sin(dot(gl_FragCoord.xy, scale)) * 43758.5453);\r\n}\r\n\r\nvoid main(void) {\r\n    vec2 px = vec2(1.0 / uTextureSize.x, 1.0 / uTextureSize.y);\r\n    // TODO 自动调节采样次数？\r\n    const float linearSamplingTimes = 7.0;\r\n    const float circleSamplingTimes = 12.0;\r\n    vec4 ownColor = texture2D(uSampler, vTextureCoord);\r\n    vec4 curColor;\r\n    float totalAlpha = 0.0;\r\n    float maxTotalAlpha = 0.0;\r\n    float curDistanceX = 0.0;\r\n    float curDistanceY = 0.0;\r\n    float offsetX = dist * cos(angle) * px.x;\r\n    float offsetY = dist * sin(angle) * px.y;\r\n\r\n    const float PI = 3.14159265358979323846264;\r\n    float cosAngle;\r\n    float sinAngle;\r\n    float offset = PI * 2.0 / circleSamplingTimes * random(vec2(12.9898, 78.233));\r\n    float stepX = blurX * px.x / linearSamplingTimes;\r\n    float stepY = blurY * px.y / linearSamplingTimes;\r\n    for (float a = 0.0; a <= PI * 2.0; a += PI * 2.0 / circleSamplingTimes) {\r\n        cosAngle = cos(a + offset);\r\n        sinAngle = sin(a + offset);\r\n        for (float i = 1.0; i <= linearSamplingTimes; i++) {\r\n            curDistanceX = i * stepX * cosAngle;\r\n            curDistanceY = i * stepY * sinAngle;\r\n            if (vTextureCoord.x + curDistanceX - offsetX >= 0.0 && vTextureCoord.y + curDistanceY + offsetY <= 1.0){\r\n                curColor = texture2D(uSampler, vec2(vTextureCoord.x + curDistanceX - offsetX, vTextureCoord.y + curDistanceY + offsetY));\r\n                totalAlpha += (linearSamplingTimes - i) * curColor.a;\r\n            }\r\n            maxTotalAlpha += (linearSamplingTimes - i);\r\n        }\r\n    }\r\n\r\n    ownColor.a = max(ownColor.a, 0.0001);\r\n    ownColor.rgb = ownColor.rgb / ownColor.a;\r\n\r\n    float outerGlowAlpha = (totalAlpha / maxTotalAlpha) * strength * alpha * (1. - inner) * max(min(hideObject, knockout), 1. - ownColor.a);\r\n    float innerGlowAlpha = ((maxTotalAlpha - totalAlpha) / maxTotalAlpha) * strength * alpha * inner * ownColor.a;\r\n\r\n    ownColor.a = max(ownColor.a * knockout * (1. - hideObject), 0.0001);\r\n    vec3 mix1 = mix(ownColor.rgb, color.rgb, innerGlowAlpha / (innerGlowAlpha + ownColor.a));\r\n    vec3 mix2 = mix(mix1, color.rgb, outerGlowAlpha / (innerGlowAlpha + ownColor.a + outerGlowAlpha));\r\n    float resultAlpha = min(ownColor.a + outerGlowAlpha + innerGlowAlpha, 1.);\r\n    gl_FragColor = vec4(mix2 * resultAlpha, resultAlpha);\r\n}";
+            EgretShaderLib.primitive_frag = "precision lowp float;\r\nvarying vec2 vTextureCoord;\r\nvarying vec4 vColor;\r\n\r\nvoid main(void) {\r\n    gl_FragColor = vColor;\r\n}";
+            EgretShaderLib.texture_frag = "precision lowp float;\r\nvarying vec2 vTextureCoord;\r\nvarying vec4 vColor;\r\nuniform sampler2D uSampler;\r\n\r\nvoid main(void) {\r\n    gl_FragColor = texture2D(uSampler, vTextureCoord) * vColor;\r\n}";
+            EgretShaderLib.texture_etc_alphamask_frag = "precision lowp float; \r\n varying vec2 vTextureCoord; \r\n varying vec4 vColor;\r\n uniform sampler2D uSampler;\r\n  uniform sampler2D uSamplerAlphaMask; \r\n void main(void) { \r\n  vec4 v4Color = texture2D(uSampler, vTextureCoord); \r\n  vec4 vec4Alpha = texture2D(uSamplerAlphaMask, vTextureCoord);\r\n v4Color = v4Color * vec4Alpha; v4Color.a = vec4Alpha.r; gl_FragColor = v4Color * vColor;\r\n}";
             return EgretShaderLib;
         }());
         wxgame.EgretShaderLib = EgretShaderLib;
@@ -7825,3 +7915,316 @@ window["sharedCanvas"].isCanvas = true;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 ;
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
+(function (egret) {
+    //refactor
+    var CompressedTextureData = (function () {
+        function CompressedTextureData() {
+        }
+        return CompressedTextureData;
+    }());
+    egret.CompressedTextureData = CompressedTextureData;
+    __reflect(CompressedTextureData.prototype, "egret.CompressedTextureData");
+    egret.etc_alpha_mask = 'etc_alpha_mask';
+    egret.engine_default_empty_texture = 'engine_default_empty_texture';
+    egret.is_compressed_texture = 'is_compressed_texture';
+    egret.glContext = 'glContext';
+    /**
+     * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
+     * transparent bitmap that contains alpha channel data. Either type of BitmapData object is stored as a buffer of 32-bit
+     * integers. Each 32-bit integer determines the properties of a single pixel in the bitmap.<br/>
+     * Each 32-bit integer is a combination of four 8-bit channel values (from 0 to 255) that describe the alpha transparency
+     * and the red, green, and blue (ARGB) values of the pixel. (For ARGB values, the most significant byte represents the
+     * alpha channel value, followed by red, green, and blue.)
+     * @see egret.Bitmap
+     * @version Egret 2.4
+     * @platform Web,Native
+     * @language en_US
+     */
+    /**
+     * BitmapData 对象是一个包含像素数据的数组。此数据可以表示完全不透明的位图，或表示包含 Alpha 通道数据的透明位图。
+     * 以上任一类型的 BitmapData 对象都作为 32 位整数的缓冲区进行存储。每个 32 位整数确定位图中单个像素的属性。<br/>
+     * 每个 32 位整数都是四个 8 位通道值（从 0 到 255）的组合，这些值描述像素的 Alpha 透明度以及红色、绿色、蓝色 (ARGB) 值。
+     * （对于 ARGB 值，最高有效字节代表 Alpha 通道值，其后的有效字节分别代表红色、绿色和蓝色通道值。）
+     * @see egret.Bitmap
+     * @version Egret 2.4
+     * @platform Web,Native
+     * @language zh_CN
+     */
+    var BitmapData = (function (_super) {
+        __extends(BitmapData, _super);
+        /**
+         * Initializes a BitmapData object to refer to the specified source object.
+         * @param source The source object being referenced.
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * 创建一个引用指定 source 实例的 BitmapData 对象
+         * @param source 被引用的 source 实例
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        function BitmapData(source) {
+            var _this = _super.call(this) || this;
+            /**
+             * Texture format.
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language en_US
+             */
+            /**
+             * 纹理格式。
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language zh_CN
+             */
+            _this.format = "image";
+            /**
+             * @private
+             * webgl纹理生成后，是否删掉原始图像数据
+             */
+            _this.$deleteSource = true;
+            /**
+             * @private
+             *
+             */
+            _this.compressedTextureData = [];
+            _this.debugCompressedTextureURL = '';
+            _this.etcAlphaMask = null;
+            if (egret.nativeRender) {
+                var nativeBitmapData = new egret_native.NativeBitmapData();
+                nativeBitmapData.$init();
+                _this.$nativeBitmapData = nativeBitmapData;
+            }
+            _this.source = source;
+            // this.width = source.width;
+            // this.height = source.height;
+            _this.source = source;
+            if (_this.source) {
+                _this.width = +source.width;
+                _this.height = +source.height;
+            }
+            else {
+                ///compressed texture?
+            }
+            return _this;
+        }
+        Object.defineProperty(BitmapData.prototype, "source", {
+            get: function () {
+                return this.$source;
+            },
+            set: function (value) {
+                this.$source = value;
+                if (egret.nativeRender) {
+                    egret_native.NativeDisplayObject.setSourceToNativeBitmapData(this.$nativeBitmapData, value);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BitmapData.create = function (type, data, callback) {
+            var base64 = "";
+            if (type === "arraybuffer") {
+                base64 = egret.Base64Util.encode(data);
+            }
+            else {
+                base64 = data;
+            }
+            var imageType = "image/png"; //default value
+            if (base64.charAt(0) === '/') {
+                imageType = "image/jpeg";
+            }
+            else if (base64.charAt(0) === 'R') {
+                imageType = "image/gif";
+            }
+            else if (base64.charAt(0) === 'i') {
+                imageType = "image/png";
+            }
+            var img = new Image();
+            img.src = "data:" + imageType + ";base64," + base64;
+            img.crossOrigin = '*';
+            var bitmapData = new BitmapData(img);
+            img.onload = function () {
+                img.onload = undefined;
+                bitmapData.source = img;
+                bitmapData.height = img.height;
+                bitmapData.width = img.width;
+                if (callback) {
+                    callback(bitmapData);
+                }
+            };
+            return bitmapData;
+        };
+        BitmapData.prototype.$dispose = function () {
+            if (egret.Capabilities.renderMode == "webgl" && this.webGLTexture) {
+                egret.WebGLUtils.deleteWebGLTexture(this.webGLTexture);
+                this.webGLTexture = null;
+            }
+            //native or WebGLRenderTarget
+            if (this.source && this.source.dispose) {
+                this.source.dispose();
+            }
+            // WeChat Memory leakage bug
+            if (this.source && this.source.src) {
+                this.source.src = "";
+            }
+            this.source = null;
+            ///dispose compressed texture info
+            //this.bitmapCompressedData.length = 0;
+            this.clearCompressedTextureData();
+            this.debugCompressedTextureURL = '';
+            this.etcAlphaMask = null;
+            ///
+            if (egret.nativeRender) {
+                egret_native.NativeDisplayObject.disposeNativeBitmapData(this.$nativeBitmapData);
+            }
+            BitmapData.$dispose(this);
+        };
+        BitmapData.$addDisplayObject = function (displayObject, bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                BitmapData._displayList[hashCode] = [displayObject];
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            if (tempList.indexOf(displayObject) < 0) {
+                tempList.push(displayObject);
+            }
+        };
+        BitmapData.$removeDisplayObject = function (displayObject, bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            var index = tempList.indexOf(displayObject);
+            if (index >= 0) {
+                tempList.splice(index, 1);
+            }
+        };
+        BitmapData.$invalidate = function (bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            for (var i = 0; i < tempList.length; i++) {
+                if (tempList[i] instanceof egret.Bitmap) {
+                    tempList[i].$refreshImageData();
+                }
+                var bitmap = tempList[i];
+                bitmap.$renderDirty = true;
+                var p = bitmap.$parent;
+                if (p && !p.$cacheDirty) {
+                    p.$cacheDirty = true;
+                    p.$cacheDirtyUp();
+                }
+                var maskedObject = bitmap.$maskedObject;
+                if (maskedObject && !maskedObject.$cacheDirty) {
+                    maskedObject.$cacheDirty = true;
+                    maskedObject.$cacheDirtyUp();
+                }
+            }
+        };
+        BitmapData.$dispose = function (bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            for (var _i = 0, tempList_1 = tempList; _i < tempList_1.length; _i++) {
+                var node = tempList_1[_i];
+                if (node instanceof egret.Bitmap) {
+                    node.$bitmapData = null;
+                }
+                node.$renderDirty = true;
+                var p = node.$parent;
+                if (p && !p.$cacheDirty) {
+                    p.$cacheDirty = true;
+                    p.$cacheDirtyUp();
+                }
+                var maskedObject = node.$maskedObject;
+                if (maskedObject && !maskedObject.$cacheDirty) {
+                    maskedObject.$cacheDirty = true;
+                    maskedObject.$cacheDirtyUp();
+                }
+            }
+            delete BitmapData._displayList[hashCode];
+        };
+        BitmapData.prototype._getCompressedTextureData = function (level, face) {
+            if (true) {
+                //level face is valid?
+            }
+            var levelData = this.compressedTextureData[level];
+            return levelData ? levelData[face] : null;
+        };
+        BitmapData.prototype.getCompressed2dTextureData = function () {
+            return this._getCompressedTextureData(0, 0);
+        };
+        BitmapData.prototype.hasCompressed2d = function () {
+            return !!this.getCompressed2dTextureData();
+        };
+        BitmapData.prototype.clearCompressedTextureData = function () {
+            this.compressedTextureData.length = 0;
+        };
+        BitmapData._displayList = egret.createMap();
+        return BitmapData;
+    }(egret.HashObject));
+    egret.BitmapData = BitmapData;
+    __reflect(BitmapData.prototype, "egret.BitmapData");
+})(egret || (egret = {}));

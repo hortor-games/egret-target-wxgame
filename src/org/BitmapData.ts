@@ -27,7 +27,24 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxgame {
+namespace egret {
+
+    //refactor
+    export class CompressedTextureData {
+        public glInternalFormat: number;
+        public width: number;
+        public height: number;
+        public byteArray: Uint8Array;
+        public face: number;
+        public level: number;
+    }
+
+    export const etc_alpha_mask = 'etc_alpha_mask';
+    export const engine_default_empty_texture = 'engine_default_empty_texture';
+    export const is_compressed_texture = 'is_compressed_texture';
+    export const glContext = 'glContext';
+
+    
 
     /**
      * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
@@ -51,7 +68,7 @@ namespace egret.wxgame {
      * @platform Web,Native
      * @language zh_CN
      */
-    export class BitmapData extends egret.HashObject {
+    export class BitmapData extends HashObject {
         /**
          * The width of the bitmap image in pixels.
          * @readOnly
@@ -138,6 +155,20 @@ namespace egret.wxgame {
         $deleteSource: boolean = true;
 
         /**
+         * @private
+         * id
+         */
+        public $nativeBitmapData: egret_native.NativeBitmapData;
+
+        /**
+         * @private
+         * 
+         */
+        public readonly compressedTextureData: Array<Array<CompressedTextureData>> = [];
+        public debugCompressedTextureURL: string = '';
+        public etcAlphaMask: Nullable<BitmapData> = null;
+
+        /**
          * Initializes a BitmapData object to refer to the specified source object.
          * @param source The source object being referenced.
          * @version Egret 2.4
@@ -151,11 +182,24 @@ namespace egret.wxgame {
          * @platform Web,Native
          * @language zh_CN
          */
-        constructor(source) {
+        constructor(source: any) {
             super();
+            if (egret.nativeRender) {
+                let nativeBitmapData = new egret_native.NativeBitmapData();
+                nativeBitmapData.$init();
+                this.$nativeBitmapData = nativeBitmapData;
+            }
             this.source = source;
-            this.width = source.width;
-            this.height = source.height;
+            // this.width = source.width;
+            // this.height = source.height;
+            this.source = source;
+            if (this.source) {
+                this.width = +source.width;
+                this.height = +source.height;
+            }
+            else {
+                ///compressed texture?
+            }
         }
 
         public get source(): any {
@@ -164,6 +208,9 @@ namespace egret.wxgame {
 
         public set source(value: any) {
             this.$source = value;
+            if (egret.nativeRender) {
+                egret_native.NativeDisplayObject.setSourceToNativeBitmapData(this.$nativeBitmapData, value);
+            }
         }
 
         public static create(type: "arraybuffer", data: ArrayBuffer, callback?: (bitmapData: BitmapData) => void): BitmapData;
@@ -209,11 +256,22 @@ namespace egret.wxgame {
             if (this.source && this.source.dispose) {
                 this.source.dispose();
             }
-            // clean buffer for wechat
-            if(this.source && this.source.src){
+            // WeChat Memory leakage bug
+            if (this.source && this.source.src) {
                 this.source.src = "";
             }
             this.source = null;
+
+            ///dispose compressed texture info
+            //this.bitmapCompressedData.length = 0;
+            this.clearCompressedTextureData();
+            this.debugCompressedTextureURL = '';
+            this.etcAlphaMask = null;
+            ///
+            
+            if (egret.nativeRender) {
+                egret_native.NativeDisplayObject.disposeNativeBitmapData(this.$nativeBitmapData);
+            }
             BitmapData.$dispose(this);
         }
 
@@ -317,6 +375,25 @@ namespace egret.wxgame {
             }
             delete BitmapData._displayList[hashCode];
         }
+
+        private _getCompressedTextureData(level: number, face: number): CompressedTextureData {
+            if (DEBUG) {
+                //level face is valid?
+            }
+            const levelData = this.compressedTextureData[level];
+            return levelData ? levelData[face] : null;
+        }
+
+        public getCompressed2dTextureData(): CompressedTextureData {
+            return this._getCompressedTextureData(0, 0);
+        }
+
+        public hasCompressed2d(): boolean {
+            return !!this.getCompressed2dTextureData();
+        }
+        
+        public clearCompressedTextureData(): void {
+            this.compressedTextureData.length = 0;
+        }
     }
-    egret.BitmapData = BitmapData;
 }
